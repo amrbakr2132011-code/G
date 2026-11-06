@@ -1,0 +1,492 @@
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إلى أميرتي وغاليتي غادة 💖</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cairo & Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        roseGold: '#e8b4b8',
+                        deepBlush: '#d86979',
+                        darkBg: '#0f0c1b',
+                        cardBg: 'rgba(255, 255, 255, 0.04)',
+                        cardBorder: 'rgba(232, 180, 184, 0.15)',
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        tajawal: ['Tajawal', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0f0c1b;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Ambient Glow & Floating Particles */
+        .glow-bg {
+            background: radial-gradient(circle at 50% 20%, rgba(216, 105, 121, 0.15) 0%, rgba(15, 12, 27, 0.95) 70%);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(232, 180, 184, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-5px);
+            border-color: rgba(232, 180, 184, 0.4);
+            box-shadow: 0 12px 40px 0 rgba(216, 105, 121, 0.25);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #fff 0%, #e8b4b8 50%, #d86979 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Floating particles */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+            100% { transform: translateY(-40px) rotate(360deg); opacity: 0; }
+        }
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: float 4s linear infinite;
+        }
+
+        /* Heartbeat Animation */
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(216, 105, 121, 0.6)); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 25px rgba(216, 105, 121, 0.9)); }
+        }
+        .pulse-glow {
+            animation: pulseGlow 2.5s infinite ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0c1b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d86979;
+            border-radius: 10px;
+        }
+
+        /* Tap Sparkle Effects */
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            font-size: 1.2rem;
+            animation: sparkleAnim 1s ease-out forwards;
+            z-index: 9999;
+        }
+        @keyframes sparkleAnim {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5) rotate(0deg); }
+            100% { opacity: 0; transform: translate(-50%, -100px) scale(1.4) rotate(45deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen glow-bg relative flex flex-col justify-between selection:bg-deepBlush selection:text-white">
+
+    <!-- Ambient Audio Player Container (Hidden HTML Audio, Custom Button) -->
+    <audio id="bgMusic" loop preload="auto">
+        <!-- Soft romantic instrumental music source -->
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-piano-112199.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Floating Sound Toggle Button -->
+    <button id="musicToggle" class="fixed top-5 left-5 z-40 w-12 h-12 rounded-full glass-card flex items-center justify-center text-roseGold hover:text-white transition duration-300 shadow-lg border border-roseGold/30">
+        <i id="musicIcon" class="fas fa-music text-lg"></i>
+    </button>
+
+    <!-- Canvas for Stars Background -->
+    <canvas id="starsCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- ================= 1. PASSWORD LOCK SCREEN ================= -->
+    <div id="lockScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-darkBg/95 backdrop-blur-xl transition-opacity duration-700">
+        <div class="glass-card max-w-md w-full p-8 rounded-3xl text-center relative border border-roseGold/20 shadow-2xl">
+            <div class="w-20 h-20 mx-auto mb-6 rounded-full glass-card flex items-center justify-center pulse-glow border border-roseGold/40">
+                <i class="fas fa-lock text-3xl text-deepBlush"></i>
+            </div>
+            
+            <h2 class="text-2xl md:text-3xl font-bold mb-2 text-gradient">عالمنا الخاص ❤️</h2>
+            <p class="text-gray-400 text-sm mb-6 leading-relaxed">أدخلي التاريخ السرّي الخاص بكِ لفتح الرسالة 🔑</p>
+            
+            <form id="lockForm" onsubmit="unlockApp(event)" class="space-y-4">
+                <div class="relative">
+                    <input type="password" id="passInput" placeholder="•• / •• / ••••" required
+                        class="w-full text-center text-xl tracking-widest px-4 py-3.5 rounded-2xl bg-white/5 border border-roseGold/30 focus:border-deepBlush focus:ring-2 focus:ring-deepBlush/50 text-white placeholder-gray-500 outline-none transition duration-300">
+                </div>
+                
+                <button type="submit" 
+                    class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-deepBlush to-roseGold text-white font-bold text-lg shadow-lg hover:brightness-110 active:scale-95 transition duration-300">
+                    دخول 💕
+                </button>
+            </form>
+
+            <p id="errorMessage" class="text-rose-400 text-xs mt-3 hidden animate-bounce">
+                التاريخ غير صحيح، حاولي مرة أخرى يا أميرتي 🌸
+            </p>
+        </div>
+    </div>
+
+    <!-- ================= 2. MAIN APP CONTENT ================= -->
+    <main id="mainContent" class="relative z-10 hidden opacity-0 transition-opacity duration-1000 max-w-4xl mx-auto px-4 py-12 flex-grow">
+        
+        <!-- Header / Apology Banner -->
+        <section class="text-center mb-16 pt-6">
+            <div class="inline-block px-4 py-1.5 rounded-full glass-card border border-roseGold/30 text-roseGold text-xs font-semibold mb-4 tracking-wide">
+                ✨ رسالة خاصة جداً لبطتي
+            </div>
+            
+            <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight text-gradient">
+                حقك عليا يا غادة.. زعلُكِ مش بيهون عليا أبداً 💖
+            </h1>
+            
+            <div class="glass-card p-6 md:p-8 rounded-3xl border border-roseGold/20 mb-8 max-w-2xl mx-auto leading-relaxed text-gray-200 font-tajawal text-lg md:text-xl">
+                <p class="mb-4">
+                    يا أحنّ حاجة حصلت في حياتي، أنتي مش بس حبيبتي.. أنتي قطعتي مني، <span class="text-roseGold font-bold">زي بنتي</span> اللي بخاف عليها من الهوا الطاير.
+                </p>
+                <p>
+                    أنا <span class="text-roseGold font-bold">بحبك بكل أنواع الحب</span> اللي في الدنيا؛ حب الأب لابنته، وحب الصديق لرفيقه، وحب العاشق لملهمته. زعلِك بيطفي الدنيا كلها في عيني، وعمري ما أقدر أشوف عيونك زعلانين بسببي.
+                </p>
+            </div>
+        </section>
+
+        <!-- Live Love Counter Timeline -->
+        <section class="mb-16">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gradient">حكايتنا مستمرة منذ ⏳</h2>
+                <p class="text-gray-400 text-sm mt-1">منذ أول يوم التقت فيه أرواحنا (29 سبتمبر 2023)</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-card glass-card-hover p-6 rounded-2xl text-center border border-roseGold/20">
+                    <span id="counterDays" class="block text-4xl md:text-5xl font-black text-roseGold mb-1">0</span>
+                    <span class="text-xs md:text-sm text-gray-400 font-medium">يـوم</span>
+                </div>
+                <div class="glass-card glass-card-hover p-6 rounded-2xl text-center border border-roseGold/20">
+                    <span id="counterHours" class="block text-4xl md:text-5xl font-black text-roseGold mb-1">0</span>
+                    <span class="text-xs md:text-sm text-gray-400 font-medium">سـاعة</span>
+                </div>
+                <div class="glass-card glass-card-hover p-6 rounded-2xl text-center border border-roseGold/20">
+                    <span id="counterMinutes" class="block text-4xl md:text-5xl font-black text-roseGold mb-1">0</span>
+                    <span class="text-xs md:text-sm text-gray-400 font-medium">دقيقـة</span>
+                </div>
+                <div class="glass-card glass-card-hover p-6 rounded-2xl text-center border border-roseGold/20">
+                    <span id="counterSeconds" class="block text-4xl md:text-5xl font-black text-roseGold mb-1">0</span>
+                    <span class="text-xs md:text-sm text-gray-400 font-medium">ثانيـة</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Envelope Feature -->
+        <section class="mb-16">
+            <div class="glass-card p-8 rounded-3xl text-center border border-roseGold/30 relative overflow-hidden">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-deepBlush/20 flex items-center justify-center text-roseGold text-2xl pulse-glow">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-2">رسالة سريّة من القلب 💌</h3>
+                <p class="text-gray-400 text-sm mb-6">اضغطي على المظروف لاكتشاف ما يخفيه لكِ قلبي</p>
+                
+                <button onclick="toggleEnvelopeMessage()" class="px-8 py-3.5 rounded-full bg-white/10 hover:bg-roseGold/20 border border-roseGold/40 text-roseGold font-semibold transition duration-300 active:scale-95">
+                    افتحي المظروف ✨
+                </button>
+
+                <div id="envelopeMessage" class="hidden mt-6 pt-6 border-t border-roseGold/20 text-gray-200 font-tajawal text-lg leading-relaxed animate-fade-in">
+                    "يا بطتي الغالية.. قد لا أكون دائماً كاملاً، ولكن حبك في قلبي كامل لا ينقص أبداً. كل لحظة وأنتي في حياتي هي نعمة أشكر الله عليها. ابتسمي يا بنتي الجميلة، فابتسامتكِ هي من تضيء عالمي."
+                </div>
+            </div>
+        </section>
+
+        <!-- Romantic Poetry Section -->
+        <section class="mb-16">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gradient">قصائد غزل لـ "غادة" 📜✨</h2>
+                <p class="text-gray-400 text-sm mt-1">أبيات كُتبت بصدق من أجلكِ فقط</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Poem Card 1 -->
+                <div class="glass-card glass-card-hover p-6 md:p-8 rounded-3xl border border-roseGold/20 relative">
+                    <div class="text-roseGold text-3xl mb-4"><i class="fas fa-feather-alt"></i></div>
+                    <h4 class="text-xl font-bold text-white mb-3">أنتِ البداية والنهاية</h4>
+                    <p class="text-gray-300 font-tajawal leading-loose text-base md:text-lg">
+                        يا غادةَ القلبِ يا أحلى أمانيهِ<br>
+                        يا مَن بحُبِّكِ يزهو العمرُ وتُحْيِيهِ<br>
+                        لو كانَ زعلُكِ ينـزلُ كالمطرِ دمعاً<br>
+                        لَبعتُ الروحَ كي أرضيكِ وأشفيهِ
+                    </p>
+                </div>
+
+                <!-- Poem Card 2 -->
+                <div class="glass-card glass-card-hover p-6 md:p-8 rounded-3xl border border-roseGold/20 relative">
+                    <div class="text-roseGold text-3xl mb-4"><i class="fas fa-heart"></i></div>
+                    <h4 class="text-xl font-bold text-white mb-3">بطتي وحبيبتي وبنتي</h4>
+                    <p class="text-gray-300 font-tajawal leading-loose text-base md:text-lg">
+                        يا بطتي الحلوةَ يا طفلتي والأملْ<br>
+                        عشقكِ في الفؤادِ فاقَ الكُتُبَ والْجُمَلْ<br>
+                        أنتِ ابنتي التي أحميها برجائي<br>
+                        وحبيبتي التي لا بديلَ لها ولا بَدَلْ
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reasons Why I Love You Interactive Cards -->
+        <section class="mb-16">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gradient">لماذا أنتِ كل حياتي؟ 💖</h2>
+                <p class="text-gray-400 text-sm mt-1">اضغطي على كل كارت لاكتشاف التفاصيل</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div onclick="revealCard(this)" class="glass-card p-6 rounded-2xl cursor-pointer border border-roseGold/20 text-center transition duration-300 hover:border-roseGold/50">
+                    <i class="fas fa-smile-beam text-3xl text-roseGold mb-3"></i>
+                    <h4 class="text-lg font-bold text-white mb-2">ابتسامتكِ</h4>
+                    <p class="card-desc hidden text-sm text-gray-300 font-tajawal">ضحكتك بتمحي أي هم في الدنيا وترجعلي طافتي وحياتي.</p>
+                </div>
+
+                <div onclick="revealCard(this)" class="glass-card p-6 rounded-2xl cursor-pointer border border-roseGold/20 text-center transition duration-300 hover:border-roseGold/50">
+                    <i class="fas fa-shield-heart text-3xl text-roseGold mb-3"></i>
+                    <h4 class="text-lg font-bold text-white mb-2">قلبك الطيب</h4>
+                    <p class="card-desc hidden text-sm text-gray-300 font-tajawal">طيبة قلبك هي اللي خلتك بالنسبة ليا مش بس حبيبة، دي بنتي الحنينة.</p>
+                </div>
+
+                <div onclick="revealCard(this)" class="glass-card p-6 rounded-2xl cursor-pointer border border-roseGold/20 text-center transition duration-300 hover:border-roseGold/50">
+                    <i class="fas fa-infinity text-3xl text-roseGold mb-3"></i>
+                    <h4 class="text-lg font-bold text-white mb-2">مكانتكِ المستحيلة</h4>
+                    <p class="card-desc hidden text-sm text-gray-300 font-tajawal">مفيش أي حد يحل محلك ولا يستوعب غلاوتك في قلبي يا غادة.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Message & Reassurance -->
+        <section class="text-center py-8">
+            <div class="glass-card p-8 rounded-3xl border border-roseGold/30">
+                <h3 class="text-2xl font-bold text-gradient mb-3">صافية يا أجمل غادة؟ 🌸</h3>
+                <p class="text-gray-300 font-tajawal mb-6">الوعد دايماً إني أفضل جمبك وأحميكي وأحبك كل يوم أكتر من اللي قبله.</p>
+                <div class="flex justify-center items-center gap-2 text-roseGold text-2xl">
+                    <i class="fas fa-heart"></i>
+                    <i class="fas fa-heart text-3xl"></i>
+                    <i class="fas fa-heart"></i>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 text-center py-6 text-gray-500 text-xs font-tajawal border-t border-white/5">
+        صُنع بحب ومشاعر صادقة خصيصاً لـ غادة ❤️
+    </footer>
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // --- 1. Password Verification System ---
+        function unlockApp(e) {
+            e.preventDefault();
+            const input = document.getElementById('passInput').value.trim();
+            const errMsg = document.getElementById('errorMessage');
+
+            // Sanitize input (handles formats like 29/4/2009, 29/04/2009, 2942009, 29-4-2009)
+            const sanitized = input.replace(/[\/\-\.\s]/g, '');
+
+            if (sanitized === '2942009' || sanitized === '29042009') {
+                const lockScreen = document.getElementById('lockScreen');
+                const mainContent = document.getElementById('mainContent');
+
+                // Fade out Lock Screen
+                lockScreen.style.opacity = '0';
+                setTimeout(() => {
+                    lockScreen.style.display = 'none';
+                    mainContent.classList.remove('hidden');
+                    // Smooth Fade In Main Content
+                    setTimeout(() => {
+                        mainContent.style.opacity = '1';
+                    }, 50);
+                }, 700);
+
+                // Auto play sound if possible
+                tryPlayMusic();
+            } else {
+                errMsg.classList.remove('hidden');
+                // Shake effect on input
+                const inputEl = document.getElementById('passInput');
+                inputEl.classList.add('border-rose-500');
+                setTimeout(() => inputEl.classList.remove('border-rose-500'), 1000);
+            }
+        }
+
+        // --- 2. Dynamic Counter Engine ---
+        // Anniversary Start Date: 29 September 2023
+        const startDate = new Date('2023-09-29T00:00:00');
+
+        function updateCounter() {
+            const now = new Date();
+            const diffTime = Math.abs(now - startDate);
+
+            const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diffTime / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diffTime / (1000 * 60)) % 60);
+            const seconds = Math.floor((diffTime / 1000) % 60);
+
+            document.getElementById('counterDays').innerText = days;
+            document.getElementById('counterHours').innerText = hours < 10 ? '0' + hours : hours;
+            document.getElementById('counterMinutes').innerText = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('counterSeconds').innerText = seconds < 10 ? '0' + seconds : seconds;
+        }
+
+        setInterval(updateCounter, 1000);
+        updateCounter(); // Initial call
+
+        // --- 3. Interactive Romantic Tap / Click Sparkles & Hearts ---
+        const icons = ['❤️', '💖', '✨', '🌸', '💕'];
+        document.addEventListener('click', function (e) {
+            // Ignore click if on inputs/buttons to keep UX clean
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.innerText = icons[Math.floor(Math.random() * icons.length)];
+            sparkle.style.left = e.clientX + 'px';
+            sparkle.style.top = e.clientY + 'px';
+
+            document.body.appendChild(sparkle);
+
+            setTimeout(() => {
+                sparkle.remove();
+            }, 1000);
+        });
+
+        // --- 4. Interactive Envelope Message Toggle ---
+        function toggleEnvelopeMessage() {
+            const msg = document.getElementById('envelopeMessage');
+            msg.classList.toggle('hidden');
+        }
+
+        // --- 5. Interactive Cards Reveal ---
+        function revealCard(cardEl) {
+            const desc = cardEl.querySelector('.card-desc');
+            if (desc.classList.contains('hidden')) {
+                desc.classList.remove('hidden');
+                cardEl.classList.add('bg-white/10', 'border-roseGold');
+            } else {
+                desc.classList.add('hidden');
+                cardEl.classList.remove('bg-white/10', 'border-roseGold');
+            }
+        }
+
+        // --- 6. Music Toggle Controller ---
+        const audio = document.getElementById('bgMusic');
+        const musicBtn = document.getElementById('musicToggle');
+        const musicIcon = document.getElementById('musicIcon');
+        let isPlaying = false;
+
+        function tryPlayMusic() {
+            audio.play().then(() => {
+                isPlaying = true;
+                musicIcon.className = 'fas fa-volume-up text-lg text-roseGold';
+            }).catch(() => {
+                isPlaying = false;
+                musicIcon.className = 'fas fa-music text-lg text-roseGold';
+            });
+        }
+
+        musicBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                audio.pause();
+                musicIcon.className = 'fas fa-music text-lg text-roseGold';
+                isPlaying = false;
+            } else {
+                audio.play();
+                musicIcon.className = 'fas fa-volume-up text-lg text-roseGold';
+                isPlaying = true;
+            }
+        });
+
+        // --- 7. Floating Canvas Stars Background ---
+        const canvas = document.getElementById('starsCanvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Star {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.8 + 0.5;
+                this.speedY = Math.random() * 0.3 + 0.1;
+                this.opacity = Math.random() * 0.8 + 0.2;
+            }
+            update() {
+                this.y -= this.speedY;
+                if (this.y < 0) {
+                    this.y = canvas.height;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+            draw() {
+                ctx.fillStyle = `rgba(232, 180, 184, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < 65; i++) {
+                stars.push(new Star());
+            }
+        }
+        initStars();
+
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+            requestAnimationFrame(animateStars);
+        }
+        animateStars();
+    </script>
+</body>
+</html>
+```
